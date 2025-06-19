@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Teacher Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #2b5876, #4e4376);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px 30px;
+      border-radius: 20px;
+      width: 340px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.8s ease forwards;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      box-shadow: 0 0 8px #a2d4ec;
+    }
+
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #00c9a7;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00b49c;
+    }
+
+    .toggle {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #d6f1ff;
+    }
+
+    @keyframes slideIn {
+      0% {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container" id="authForm">
+    <h2 id="formTitle">Teacher Login</h2>
+    <form id="form">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" placeholder="Enter your name" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password" required>
+      </div>
+      <div class="form-group" id="confirmGroup" style="display: none;">
+        <label for="confirm">Confirm Password</label>
+        <input type="password" id="confirm" placeholder="Confirm password">
+      </div>
+      <div class="form-group">
+        <label for="profession">Profession</label>
+        <select id="profession" disabled>
+          <option selected>Teacher</option>
+        </select>
+      </div>
+      <button type="submit" id="submitBtn">Login</button>
+      <div class="toggle" onclick="toggleForm()">Don't have an account? Signup</div>
+    </form>
+  </div>
+
+  <script>
+  let isSignup = false;
+
+  function toggleForm() {
+    isSignup = !isSignup;
+    document.getElementById("formTitle").innerText = isSignup ? "Teacher Signup" : "Teacher Login";
+    document.getElementById("submitBtn").innerText = isSignup ? "Signup" : "Login";
+    document.getElementById("confirmGroup").style.display = isSignup ? "block" : "none";
+    document.querySelector(".toggle").innerText = isSignup
+      ? "Already have an account? Login"
+      : "Don't have an account? Signup";
+  }
+
+  document.getElementById("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value.trim();
+    const password = document.getElementById("password").value;
+    const confirm = document.getElementById("confirm").value;
+
+    // Validate name
+    const nameRegex = /^[A-Za-z\s]{3,}$/;
+    if (!nameRegex.test(name)) {
+      alert("Name must be at least 3 characters long and contain only letters.");
+      return;
+    }
+
+    // Validate password
+    const passwordRegex = /^(?=.*\d).{6,}$/;
+    if (!passwordRegex.test(password)) {
+      alert("Password must be at least 6 characters long and contain at least one number.");
+      return;
+    }
+
+    if (isSignup) {
+      if (!confirm) {
+        alert("Please confirm your password.");
+        return;
+      }
+      if (password !== confirm) {
+        alert("Passwords do not match.");
+        return;
+      }
+
+      // Simulate saving credentials (in-memory for now)
+      localStorage.setItem("teacherName", name);
+      localStorage.setItem("teacherPassword", password);
+      alert("Signup successful! Please login now.");
+      toggleForm(); // switch to login
+    } else {
+      const savedName = localStorage.getItem("teacherName");
+      const savedPassword = localStorage.getItem("teacherPassword");
+
+      if (name === savedName && password === savedPassword) {
+        alert("Login successful!");
+        window.location.href = "teacher-dashboard.html";
+      } else {
+        alert("Invalid name or password.");
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

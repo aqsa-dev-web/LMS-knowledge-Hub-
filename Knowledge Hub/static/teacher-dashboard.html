@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Teacher Dashboard</title>
+<style>
+  body {
+    margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f5f7fa;
+    display: flex; flex-direction: column; height: 100vh;
+  }
+
+  header {
+    background: #34495e;
+    color: white;
+    padding: 20px 40px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .dashboard {
+    display: flex;
+    flex-grow: 1;
+  }
+
+  nav {
+    width: 320px;
+    background: #2c3e50;
+    padding: 30px 20px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  nav button {
+    background: #34495e;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 20px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    transition: background 0.3s, transform 0.2s;
+  }
+
+  nav button:hover,
+  nav button.active {
+    background: #1abc9c;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(26,188,156,0.6);
+  }
+
+  main {
+    flex-grow: 1;
+    background: white;
+    padding: 40px;
+    overflow-y: auto;
+  }
+
+  /* Simple content sections for each card */
+  .content-section {
+    display: none;
+  }
+
+  .content-section.active {
+    display: block;
+  }
+
+  /* Example forms and content styling */
+  h2 {
+    color: #34495e;
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+    color: #555;
+  }
+
+  input, select, textarea {
+    margin-top: 8px;
+    padding: 10px;
+    width: 100%;
+    max-width: 500px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+  }
+
+  button.submit-btn {
+    margin-top: 20px;
+    background: #1abc9c;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+
+  button.submit-btn:hover {
+    background: #16a085;
+  }
+</style>
+</head>
+<body>
+
+<header>Teacher Dashboard</header>
+<button id="logoutBtn" style="
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+">Logout</button>
+
+
+<div class="dashboard">
+  <nav>
+    <button class="active" data-target="attendance">Attendance Management</button>
+    <button data-target="exam-results">Exam Results</button>
+    <button data-target="upload-notes">Upload Notes</button>
+    <button data-target="web-resources">Web Resources</button>
+    <button data-target="timetable">Timetable</button>
+    <button data-target="announcements">Announcements</button>
+  </nav>
+
+  <main>
+    <!-- Attendance -->
+     <section id="attendance" class="content-section active">
+      <h2>Attendance Management</h2>
+      <h3>Mark Attendance</h3>
+        <form id="attendance-form">
+          <div>
+            <label>Roll No: </label>
+            <input type="text" name="roll" required />
+            <select name="status">
+            <option value="Present">Present</option>
+            <option value="Absent">Absent</option>
+            </select>
+          </div>
+          <button type="button" onclick="addAttendance()">Add</button>
+        </form>
+
+          <ul id="attendance-list"></ul>
+
+<button onclick="submitAttendanceAndGeneratePDF()">Submit Attendance</button>
+
+      </section>
+      <!--upload exam results-->
+      <section id="exam-results" class="content-section">
+      <h2>Upload Exam Results</h2>
+      <p>Upload CSV file with columns: <strong>id, name, marks</strong></p>
+      <input type="file" id="results-file" accept=".csv" />
+      <button class="submit-btn" onclick="handleResultsUpload()">Upload Results</button>
+
+      <div id="results-table-container"></div>
+    </section>
+
+    
+    <!-- Upload Notes -->
+    <section id="upload-notes" class="content-section">
+      <h2>Upload Notes</h2>
+      <p>Upload study notes for your students.</p>
+      <form>
+        <label for="notes-class">Select Semester</label>
+        <select id="notes-class">
+          <option>SEM-1</option>
+          <option>SEM-3</option>
+          <option>SEM-5</option>
+          <option>SEM-7</option>
+        </select>
+        <label for="notes-title">Title of Notes:</label>
+        <input type="text" id="notes-title" placeholder="Lecture 1 - Intro to Programming" />
+        <label for="notes-file">Upload Notes File (PDF/DOC):</label>
+        <input type="file" id="notes-file" />
+        <button type="submit" class="submit-btn">Upload Notes</button>
+      </form>
+    </section>
+
+    <!-- Web Resources -->
+    <section id="web-resources" class="content-section">
+      <h2>Web Resources</h2>
+      <p>Add or manage helpful web resources for your students.</p>
+      <form>
+        <label for="resource-class">Select Semester</label>
+        <select id="resource-class">
+          <option>SEM-1</option>
+          <option>SEM-3</option>
+          <option>SEM-5</option>
+          <option>SEM-7</option>
+        </select>
+        <label for="resource-title">Resource Title:</label>
+        <input type="text" id="resource-title" placeholder="Introduction to Algorithms Video" />
+        <label for="resource-link">Resource Link (URL):</label>
+        <input type="url" id="resource-link" placeholder="https://example.com" />
+        <button type="submit" class="submit-btn">Add Resource</button>
+      </form>
+    </section>
+
+    <!-- Timetable -->
+<section id="timetable" class="content-section">
+  <h2>Manage Timetable</h2>
+
+  <!-- Manual Timetable Entry Form -->
+  <form id="timetableForm">
+    <label>Day:</label>
+    <select id="day" required>
+      <option value="">Select</option>
+      <option>Monday</option>
+      <option>Tuesday</option>
+      <option>Wednesday</option>
+      <option>Thursday</option>
+      <option>Friday</option>
+      <option>Saturday</option>
+    </select>
+
+    <label>Time:</label>
+    <input type="text" id="time" placeholder="e.g., 9:00 AM - 10:30 AM" required />
+
+    <label>Semester:</label>
+    <input type="text" id="class" placeholder="e.g., Semester-1" required />
+
+    <label>Subject</label>
+    <input type="text" id="subject" placeholder="e.g., Data Science" required />
+
+
+    <button type="submit" class="submit-btn">Add Entry</button>
+  </form>
+
+  <!-- Submit Full Timetable Button -->
+  <button onclick="submitTimetable()" style="margin-top: 15px; padding: 10px 20px; background-color: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer;">
+    Submit Final Timetable
+  </button>
+
+  <!-- Timetable Table -->
+  <h3 style="margin-top: 30px;">Current Timetable</h3>
+  <table id="timetableTable" border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse; margin-top: 10px; max-width: 600px;">
+    <thead style="background: #2980b9; color: white;">
+      <tr><th>Day</th><th>Time</th><th>Semester</th><th>Subject</th></tr>
+    </thead>
+    <tbody>
+      <!-- Entries will be inserted dynamically -->
+    </tbody>
+  </table>
+</section>
+
+<script>
+  const timetableForm = document.getElementById("timetableForm");
+  const timetableTable = document.getElementById("timetableTable").querySelector("tbody");
+  let timetableData = JSON.parse(localStorage.getItem("timetable")) || [];
+
+  function renderTable() {
+    timetableTable.innerHTML = "";
+    timetableData.forEach(entry => {
+      const row = timetableTable.insertRow();
+      row.insertCell(0).textContent = entry.day;
+      row.insertCell(1).textContent = entry.time;
+      row.insertCell(2).textContent = entry.className;
+      row.insertCell(3).textContent = entry.subject;
+    });
+  }
+
+  timetableForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const day = document.getElementById("day").value;
+    const time = document.getElementById("time").value;
+    const className = document.getElementById("class").value;
+    const subject = document.getElementById("subject").value;
+
+    if (day && time && className && subject) {
+      timetableData.push({ day, time, className, subject });
+      localStorage.setItem("timetable", JSON.stringify(timetableData));
+      renderTable();
+      timetableForm.reset();
+    }
+  });
+
+  function submitTimetable() {
+    if (timetableData.length === 0) {
+      alert("Please add at least one entry before submitting.");
+      return;
+    }
+    alert("Timetable submitted and saved for student view.");
+  }
+
+  renderTable();
+</script>
+
+    <!-- Announcements -->
+    <section id="announcements" class="content-section">
+      <h2>Announcements</h2>
+      <p>Create and view announcements for your students.</p>
+      <form>
+        <label for="announcement-title">Title:</label>
+        <input type="text" id="announcement-title" placeholder="Important Notice" />
+        <label for="announcement-content">Content:</label>
+        <textarea id="announcement-content" rows="5" placeholder="Write your announcement here..."></textarea>
+        <button type="submit" class="submit-btn">Publish Announcement</button>
+      </form>
+    </section>
+  </main>
+</div>
+
+<script>
+  const buttons = document.querySelectorAll('nav button');
+  const sections = document.querySelectorAll('.content-section');
+
+  buttons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and sections
+      buttons.forEach(btn => btn.classList.remove('active'));
+      sections.forEach(sec => sec.classList.remove('active'));
+
+      // Add active class to clicked button and related section
+      button.classList.add('active');
+      const target = button.getAttribute('data-target');
+      console.log("Target ID:", target);
+      document.getElementById(target).classList.add('active');
+    });
+  });
+
+  // You can add submit handlers here for each form to handle actions
+</script>
+<script>
+  const attendanceData = [];
+
+  function addAttendance() {
+    const form = document.getElementById('attendance-form');
+    const roll = form.elements['roll'].value.trim();
+    const status = form.elements['status'].value;
+
+    if (roll === '') {
+      alert("Please enter a roll number.");
+      return;
+    }
+
+    attendanceData.push({ roll, status });
+
+    // Display in list
+    const li = document.createElement('li');
+    li.textContent = `${roll} - ${status}`;
+    document.getElementById('attendance-list').appendChild(li);
+
+    // Clear input
+    form.reset();
+  }
+
+  function submitAttendanceAndGeneratePDF() {
+    if (attendanceData.length === 0) {
+      alert("No attendance data to submit.");
+      return;
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(16);
+    doc.text(`Attendance Sheet - ${today}`, 20, 20);
+
+    let y = 40;
+    doc.setFontSize(12);
+    doc.text('Roll No.', 20, y);
+    doc.text('Status', 100, y);
+    y += 10;
+
+    attendanceData.forEach(record => {
+      doc.text(record.roll, 20, y);
+      doc.text(record.status, 100, y);
+      y += 10;
+    });
+
+    const pdfBase64 = doc.output('datauristring');
+    localStorage.setItem('attendance_pdf_' + today, pdfBase64);
+
+    alert('Attendance submitted and PDF generated!');
+    
+    // Reset everything
+    attendanceData.length = 0;
+    document.getElementById('attendance-list').innerHTML = '';
+  }
+</script>
+<script>
+  // Exam Results CSV upload & display
+  function handleResultsUpload() {
+    const fileInput = document.getElementById('results-file');
+    const file = fileInput.files[0];
+    if (!file) {
+      alert("Please select a CSV file first.");
+      return;
+    }
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: function(results) {
+        const data = results.data;
+        if (!data.length) {
+          alert("CSV is empty or invalid.");
+          return;
+        }
+
+        // Validate required fields exist in header
+        const keys = Object.keys(data[0]);
+        if (!keys.includes('id') || !keys.includes('name') || !keys.includes('marks')) {
+          alert("CSV must have columns: id, name, marks");
+          return;
+        }
+        localStorage.setItem('examResults', JSON.stringify(data));
+
+        displayResultsTable(data);
+      },
+      error: function(err) {
+        alert("Error parsing CSV: " + err.message);
+      }
+    });
+  }
+
+  function displayResultsTable(data) {
+    const container = document.getElementById('results-table-container');
+    container.innerHTML = ''; // clear previous table
+
+    const table = document.createElement('table');
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+
+    ['ID', 'Name', 'Marks'].forEach(text => {
+      const th = document.createElement('th');
+      th.textContent = text;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
+    data.forEach(row => {
+      const tr = document.createElement('tr');
+      ['id', 'name', 'marks'].forEach(key => {
+        const td = document.createElement('td');
+        td.textContent = row[key];
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    container.appendChild(table);
+  }
+</script>
+<script>
+  document.querySelector("#upload-notes form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const className = document.getElementById("notes-class").value;
+    const title = document.getElementById("notes-title").value;
+    const fileInput = document.getElementById("notes-file");
+    const file = fileInput.files[0];
+
+    if (!title || !file) {
+      alert("Please enter a title and select a file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const fileData = {
+        className,
+        title,
+        fileName: file.name,
+        fileContent: e.target.result,
+        uploadedAt: new Date().toISOString(),
+      };
+
+      let notes = JSON.parse(localStorage.getItem("uploadedNotes") || "[]");
+      notes.push(fileData);
+      localStorage.setItem("uploadedNotes", JSON.stringify(notes));
+
+      alert("Notes uploaded successfully!");
+      document.getElementById("notes-title").value = "";
+      fileInput.value = "";
+    };
+
+    reader.readAsDataURL(file);
+  });
+</script>
+<script>
+  document.querySelector("#web-resources form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const className = document.getElementById("resource-class").value;
+    const title = document.getElementById("resource-title").value.trim();
+    const link = document.getElementById("resource-link").value.trim();
+
+    if (!title || !link) {
+      alert("Please fill in both title and URL.");
+      return;
+    }
+
+    const newResource = {
+      className,
+      title,
+      link,
+      addedAt: new Date().toISOString(),
+    };
+
+    let resources = JSON.parse(localStorage.getItem("webResources") || "[]");
+    resources.push(newResource);
+    localStorage.setItem("webResources", JSON.stringify(resources));
+
+    alert("Web resource added successfully!");
+    document.getElementById("resource-title").value = "";
+    document.getElementById("resource-link").value = "";
+  });
+</script>
+<script>
+  document.querySelector("#announcements form").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const title = document.getElementById("announcement-title").value.trim();
+    const content = document.getElementById("announcement-content").value.trim();
+    const date = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+    if (!title || !content) {
+      alert("Please fill in both title and content.");
+      return;
+    }
+
+    const newAnnouncement = {
+      title,
+      content,
+      date,
+    };
+
+    let announcements = JSON.parse(localStorage.getItem("announcements") || "[]");
+    announcements.unshift(newAnnouncement); // add newest to top
+    localStorage.setItem("announcements", JSON.stringify(announcements));
+
+    alert("Announcement published!");
+    document.getElementById("announcement-title").value = "";
+    document.getElementById("announcement-content").value = "";
+  });
+</script>
+<script>
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    // Optional: Clear session data
+    localStorage.removeItem("teacherName");
+    localStorage.removeItem("teacherPassword");
+
+    // Redirect to homepage
+    window.location.href = "index.html";
+  });
+</script>
+
+</body>
+</html>

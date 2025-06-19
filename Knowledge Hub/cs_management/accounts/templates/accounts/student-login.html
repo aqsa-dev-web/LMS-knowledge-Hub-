@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Login</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #2b5876, #4e4376);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+    }
+
+    .form-container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 40px 30px;
+      border-radius: 20px;
+      width: 340px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.8s ease forwards;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      box-shadow: 0 0 8px #a2d4ec;
+    }
+
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #00c9a7;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #00b49c;
+    }
+
+    .toggle {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      color: #d6f1ff;
+    }
+
+    @keyframes slideIn {
+      0% {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="form-container" id="authForm">
+    <h2 id="formTitle">{{ form_type }}</h2>
+    <form method="post" id="form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="username" placeholder="Enter your name" value="{{ username|default:'' }}" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter password" required>
+      </div>
+      {% if is_signup %}
+      <div class="form-group" id="confirmGroup">
+        <label for="confirm">Confirm Password</label>
+        <input type="password" id="confirm" name="confirm_password" placeholder="Confirm password" required>
+      </div>
+      {% endif %}
+      <div class="form-group">
+        <label for="profession">Profession</label>
+        <select id="profession" disabled>
+          <option selected>Student</option>
+        </select>
+      </div>
+      <button type="submit" id="submitBtn">{{ form_type }}</button>
+    </form>
+
+    <div class="toggle">
+      {% if is_signup %}
+        Already have an account? <a href="{% url 'student_login' %}">Login</a>
+      {% else %}
+        Don't have an account? <a href="{% url 'student_signup' %}">Signup</a>
+      {% endif %}
+    </div>
+
+    {% if messages %}
+      <ul style="color: red;">
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</body>
+</html>

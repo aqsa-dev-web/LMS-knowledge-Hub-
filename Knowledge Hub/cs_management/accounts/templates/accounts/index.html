@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Welcome | CS Department</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #2b5876, #4e4376);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      color: #fff;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 40px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .dashboard-container {
+      display: flex;
+      gap: 40px;
+      animation: fadeInUp 1.2s ease forwards;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px 30px;
+      width: 240px;
+      text-align: center;
+      transition: transform 0.4s, background 0.4s;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .card h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+    }
+
+    .card::before {
+      content: "";
+      display: block;
+      height: 80px;
+      width: 80px;
+      margin: 0 auto 20px;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    .teacher::before {
+      background-image: url('https://cdn-icons-png.flaticon.com/512/190/190411.png');
+    }
+
+    .student::before {
+      background-image: url('https://cdn-icons-png.flaticon.com/512/3135/3135768.png');
+    }
+
+    @keyframes fadeInUp {
+      0% {
+        transform: translateY(60px);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .dashboard-container {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to CS Department</h1>
+  <div class="dashboard-container">
+    <div class="card teacher" onclick="window.location.href='teacher-login.html'">
+      <h2>Teacher Dashboard</h2>
+    </div>
+    <div class="card student" onclick="window.location.href='student-login.html'">
+      <h2>Student Dashboard</h2>
+    </div>
+  </div>
+</body>
+</html>
